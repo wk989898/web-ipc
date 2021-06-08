@@ -1,0 +1,11 @@
+{
+  "name": "hello",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node ./node/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
