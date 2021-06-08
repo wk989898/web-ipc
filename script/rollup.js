@@ -5,7 +5,7 @@ const typescript = require("@rollup/plugin-typescript")
  * rollup Client
  */
 const inputClient = {
-  input: '', // 唯一必填参数
+  input: '', 
   external: '',
   plugins: [babel(), typescript()],
 }
@@ -19,13 +19,13 @@ async function buildClient() {
  * rollup Server
  */
 const inputServer = {
-  input: '', // 唯一必填参数
+  input: '', // 
   external: '',
   plugins: [babel(), typescript()],
 }
 const outputServer = {
-  file: '',   // 若有bundle.write，必填
-  format: '', // 必填
+  file: '',   // 
+  format: '', // 
 }
 async function buildServer() {
   const bundle = await rollup.rollup(inputOptions)
