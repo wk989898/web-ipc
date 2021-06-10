@@ -1,7 +1,8 @@
 # web-ipc
 
-simple implementation ipc on the web,based websocket
+Electron ipc APIs  simply implement on the web,based websocket.  
+Communicate between the server and web client.
 
 ## notice
 
-`createIPC` returned a promise,so use `async await`.
+in web client,`createIPC` returned a promise,so use `async await`.
