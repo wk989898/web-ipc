@@ -14,7 +14,7 @@ const server = http.createServer((req, res) => {
 })
 
 const ipc = createIPC(server)
-// ipc.send('hello client!') ！false  can't find a client
+ipc.send('server broadcast') //！false  can't find a client
 ipc.on('hello server', (e, arg) => {
   console.log(`receive ${arg}`);
   e.sender('hello client', {

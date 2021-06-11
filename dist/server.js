@@ -220,7 +220,7 @@ var Server = /** @class */ (function (_super) {
     __extends(Server, _super);
     function Server() {
         var _this = _super.call(this) || this;
-        _this.hasServer = false;
+        _this.hasTarget = false;
         return _this;
     }
     Server.prototype.connect = function (server) {
@@ -238,14 +238,14 @@ var Server = /** @class */ (function (_super) {
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        this.hasServer = true;
+                        this.hasTarget = true;
                         return [2 /*return*/];
                 }
             });
         });
     };
-    Server.prototype.checkServer = function () {
-        if (!this.hasServer) {
+    Server.prototype.checkTarget = function () {
+        if (!this.hasTarget) {
             throw new Error("please add a Server!");
         }
     };
@@ -272,29 +272,31 @@ var Server = /** @class */ (function (_super) {
 var IPC = /** @class */ (function (_super) {
     __extends(IPC, _super);
     function IPC() {
-        return _super.call(this) || this;
+        var _this = _super.call(this) || this;
+        _this.serverQueue = [];
+        _this.ipcType = typeof window == 'undefined' ? 'server' : 'web';
+        return _this;
     }
-    // private server:WebSocket
-    // private hasServer:boolean=false
-    // connect(server:WebSocket):void{
-    //   this.server=server
-    //   this.hasServer=true
-    // }
-    // private checkServer() {
-    //   if (!this.hasServer){
-    //     throw new Error("please add a Server!");
-    //  }
-    // }
     IPC.prototype.send = function (channel, args) {
-        this.checkServer();
         // send message
         var data = {
             channel: channel,
             args: args
         };
+        console.log(this.ipcType);
         var res = JSON.stringify(data);
-        this.server.send(res);
+        if (this.ipcType === 'server')
+            this.serverQueue.push(res);
+        else {
+            this.checkTarget();
+            this.server.send(res);
+        }
         return this;
+    };
+    IPC.prototype.serverSend = function () {
+        var _this = this;
+        this.serverQueue.forEach(function (res) { return _this.server.send(res); });
+        this.serverQueue.length = 0;
     };
     return IPC;
 }(Server));
@@ -303,19 +305,8 @@ var ipcEvent = /** @class */ (function (_super) {
     function ipcEvent() {
         return _super.call(this) || this;
     }
-    // private server:WebSocket
-    // private hasServer:boolean=false
-    // connect(server:WebSocket):void{
-    //   this.server=server
-    //   this.hasServer=true
-    // }
-    // private checkServer() {
-    //   if (!this.hasServer){
-    //     throw new Error("please add a Server!");
-    //  }
-    // }
     ipcEvent.prototype.sender = function (channel, args) {
-        this.checkServer();
+        this.checkTarget();
         var data = {
             channel: channel,
             args: args
@@ -343,6 +334,7 @@ function createIPC(server) {
                     case 0: return [4 /*yield*/, ipc.connect(ws)];
                     case 1:
                         _a.sent();
+                        ipc.serverSend();
                         ws.on('message', function incoming(msg) {
                             var _a = JSON.parse(msg), channel = _a.channel, args = _a.args;
                             ipc.excute(channel, args);

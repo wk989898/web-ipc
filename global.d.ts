@@ -4,6 +4,7 @@ interface handleFunc {
   (event: ipcEvent, arg: any): any
 }
 interface Queue {
-  [propName: string]:Map<string,handleFunc>
+  [propName: string]: Map<string, handleFunc>
 }
+type ipcType = 'web' | 'server'
 // declare const ws:WebSocket

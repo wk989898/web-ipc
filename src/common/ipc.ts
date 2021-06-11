@@ -1,4 +1,4 @@
-import { Queue, handleFunc } from "../../global"
+import { Queue, handleFunc, ipcType } from "../../global"
 
 class Observer {
   protected queue: Queue
@@ -40,7 +40,7 @@ class Observer {
 
 class Server extends Observer {
   protected server: WebSocket
-  public hasServer: boolean = false
+  public hasTarget: boolean = false
   constructor() {
     super()
   }
@@ -51,10 +51,10 @@ class Server extends Observer {
         this.server.addEventListener('open', () => resolve(null))
       })
     }
-    this.hasServer = true
+    this.hasTarget = true
   }
-  protected checkServer() {
-    if (!this.hasServer) {
+  protected checkTarget() {
+    if (!this.hasTarget) {
       throw new Error("please add a Server!");
     }
   }
@@ -76,30 +76,31 @@ class Server extends Observer {
 }
 
 export class IPC extends Server {
+  protected ipcType: ipcType
+  private serverQueue: string[] = []
   constructor() {
     super()
+    this.ipcType = typeof window == 'undefined' ? 'server' : 'web'
   }
-  // private server:WebSocket
-  // private hasServer:boolean=false
-  // connect(server:WebSocket):void{
-  //   this.server=server
-  //   this.hasServer=true
-  // }
-  // private checkServer() {
-  //   if (!this.hasServer){
-  //     throw new Error("please add a Server!");
-  //  }
-  // }
   send(channel: string, args?: any): IPC {
-    this.checkServer()
     // send message
     const data = {
       channel,
       args
     }
+    console.log(this.ipcType )
     const res = JSON.stringify(data)
-    this.server.send(res)
+    if (this.ipcType === 'server')
+      this.serverQueue.push(res)
+    else {
+      this.checkTarget()
+      this.server.send(res)
+    }
     return this
+  }
+  serverSend(): void {
+    this.serverQueue.forEach(res => this.server.send(res))
+    this.serverQueue.length = 0
   }
 }
 
@@ -107,19 +108,8 @@ export class ipcEvent extends Server {
   constructor() {
     super()
   }
-  // private server:WebSocket
-  // private hasServer:boolean=false
-  // connect(server:WebSocket):void{
-  //   this.server=server
-  //   this.hasServer=true
-  // }
-  // private checkServer() {
-  //   if (!this.hasServer){
-  //     throw new Error("please add a Server!");
-  //  }
-  // }
   sender(channel: string, args?: any) {
-    this.checkServer()
+    this.checkTarget()
     const data = {
       channel,
       args
