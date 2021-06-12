@@ -15,8 +15,8 @@ export default async function createIPC(): Promise<undefined|IPC> {
   ws.addEventListener('message', (event) => {
     const res = event.data
     const data = JSON.parse(res)
-    const { channel, args } = data
-    ipc.excute(channel, args)
+    const { channel,type, args } = data
+    ipc.excute(channel,type, args)
   })
   return ipc
 }

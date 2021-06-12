@@ -8,8 +8,8 @@ export default function createIPC(server: any): IPC {
     await ipc.connect(ws)
     ipc.serverSend()
     ws.on('message', function incoming(msg) {
-      const { channel, args } = JSON.parse(msg)
-      ipc.excute(channel, args)
+      const { channel,type, args } = JSON.parse(msg)
+      ipc.excute(channel, type,args)
     })
   })
   server.on('upgrade', function upgrade(request, socket, head) {

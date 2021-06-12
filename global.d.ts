@@ -6,5 +6,9 @@ interface handleFunc {
 interface Queue {
   [propName: string]: Map<string, handleFunc>
 }
+interface handleQueue {
+  [propName: string]: handleFunc
+}
 type ipcType = 'web' | 'server'
+type excuteType='send'|'invoke'
 // declare const ws:WebSocket
