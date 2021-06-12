@@ -16,4 +16,4 @@ const server=app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
 
-const ipcMain=createIPC(server) // have to inlet
+const ipcMain=createIPC(server) // required

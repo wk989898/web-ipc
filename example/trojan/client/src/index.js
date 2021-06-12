@@ -5,8 +5,11 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 
 Vue.use(ElementUI);
+/**
+ * use async await 
+ */
 ; (async () => {
-  const ipc = await createIPC() //have to inlet
+  const ipc = await createIPC() 
   console.log('ipc init !')
   window.ipc = ipc
   new Vue({
