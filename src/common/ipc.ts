@@ -94,7 +94,6 @@ class IPC extends Observer {
   async excuteSync(channel: string, args?: any) {
     const ev = new ipcEvent()
     await ev.connect(this.server)
-    console.log(11111);
     const { type, listener } = this.handleQueue[channel]
     if (type == 0) this.removeHandle(channel)
     var result = await listener(ev, args)
@@ -127,7 +126,6 @@ export class ipcMain extends IPC {
     super()
   }
   send(channel: string, args?: any): any {
-    // send message
     const data = {
       channel,
       args
@@ -145,8 +143,22 @@ export class ipcRenderer extends IPC {
   constructor() {
     super()
   }
+  async sendSync(channel: string, args?: any){
+    const data = {
+      channel:`$${channel}`,
+      args
+    }
+    const res = JSON.stringify(data)
+    this.checkTarget()
+    this.server.send(res)
+    var result=await new Promise(resolve => {
+      this.on(`#${channel}`, (_, r) => {
+        resolve(r)
+      })
+    })
+    return result
+  }
   send(channel: string, args?: any) {
-    // send message
     const data = {
       channel,
       args
