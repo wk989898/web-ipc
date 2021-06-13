@@ -5,8 +5,8 @@ Communicate between the server and web client.
 
 ## idea
 
-What we run on electron can also be run on node.
-See examples for inspiration.
+What we run on electron can also be run on node.  
+See demo for inspiration.
 
 ## notice
 
