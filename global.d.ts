@@ -1,3 +1,4 @@
+import { listeners } from "process";
 import { ipcEvent } from "./src/common/ipc";
 
 interface handleFunc {
@@ -6,5 +7,11 @@ interface handleFunc {
 interface Queue {
   [propName: string]: Map<string, handleFunc>
 }
-type ipcType = 'web' | 'server'
+interface HandleQueue {
+  [propName: string]: {
+    type: number,
+    listener: handleFunc
+  }
+}
+
 // declare const ws:WebSocket

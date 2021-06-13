@@ -10,4 +10,5 @@ See demo for inspiration.
 
 ## notice
 
-in web client,`createIPC` returned a promise,so use `async await`.
+* in web client,`createIPC` returned a promise,so use `async await`.
+* use '$' and '#' in `invoke/handle`,so don't start with them.

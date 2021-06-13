@@ -1,26 +1,36 @@
-import { Queue, handleFunc, ipcType } from "../../global"
+import { Queue, handleFunc, HandleQueue } from "../../global"
 
 class Observer {
   protected queue: Queue
   protected onceQueue: Queue
+  protected handleQueue: HandleQueue
   constructor() {
     this.queue = {}
     this.onceQueue = {}
+    this.handleQueue = {}
   }
   private checkChannel(channel: string) {
     if (this.queue[channel] === void 0) this.queue[channel] = new Map()
     if (this.onceQueue[channel] === void 0) this.onceQueue[channel] = new Map()
   }
-  on(channel: string, listener: handleFunc): Observer {
+  on(channel: string, listener: handleFunc): ThisType<this> {
     const sym = JSON.stringify(listener)
     this.checkChannel(channel)
     this.queue[channel].set(sym, listener)
     return this
   }
-  once(channel: string, listener: handleFunc): Observer {
+  once(channel: string, listener: handleFunc): ThisType<this> {
     const sym = JSON.stringify(listener)
     this.checkChannel(channel)
     this.onceQueue[channel].set(sym, listener)
+    return this
+  }
+  handle(channel: string, listener: handleFunc): ThisType<this> {
+    this.handleQueue[channel] = { type: 1, listener }
+    return this
+  }
+  handleOnce(channel: string, listener: handleFunc): ThisType<this> {
+    this.handleQueue[channel] = { type: 0, listener }
     return this
   }
   listeners(channel: string): Array<handleFunc> {
@@ -28,24 +38,27 @@ class Observer {
     const once = Array.from(this.onceQueue[channel].values())
     return queue.concat(once)
   }
-  removerListener(channel: string, listener: handleFunc): Observer {
+  removerListener(channel: string, listener: handleFunc): ThisType<this> {
     const sym = JSON.stringify(listener)
     this.checkChannel(channel)
     this.queue[channel].delete(sym)
     this.onceQueue[channel].delete(sym)
     return this
   }
-  removerALLListener(channel: string): Observer {
+  removerALLListener(channel: string): ThisType<this> {
     this.checkChannel(channel)
     this.queue[channel].clear()
     this.onceQueue[channel].clear()
     return this
   }
+  removeHandle(channel: string) {
+    delete this.handleQueue[channel]
+  }
 }
 
-class Server extends Observer {
+class IPC extends Observer {
   protected server: WebSocket
-  public hasTarget: boolean = false
+  protected hasTarget: boolean = false
   constructor() {
     super()
   }
@@ -78,38 +91,73 @@ class Server extends Observer {
     })
     this.onceQueue[channel].clear()
   }
+  async excuteSync(channel: string, args?: any) {
+    const ev = new ipcEvent()
+    await ev.connect(this.server)
+    console.log(11111);
+    const { type, listener } = this.handleQueue[channel]
+    if (type == 0) this.removeHandle(channel)
+    var result = await listener(ev, args)
+    const data = {
+      channel: `#${channel}`,
+      args: result
+    }
+    const res = JSON.stringify(data)
+    this.server.send(res)
+  }
+  async invoke(channel: string, args?: any): Promise<any> {
+    await this.connect(this.server)
+    const data = {
+      channel: `$${channel}`,
+      args
+    }
+    const res = JSON.stringify(data)
+    this.server.send(res)
+    return new Promise(resolve => {
+      this.on(`#${channel}`, (_, r) => {
+        resolve(r)
+      })
+    })
+  }
 }
 
-export class IPC extends Server {
-  protected ipcType: ipcType
+export class ipcMain extends IPC {
   private serverQueue: string[] = []
   constructor() {
     super()
-    this.ipcType = typeof window == 'undefined' ? 'server' : 'web'
   }
-  send(channel: string, args?: any): IPC {
+  send(channel: string, args?: any): any {
     // send message
     const data = {
       channel,
       args
     }
-    console.log(this.ipcType)
     const res = JSON.stringify(data)
-    if (this.ipcType === 'server')
-      this.serverQueue.push(res)
-    else {
-      this.checkTarget()
-      this.server.send(res)
-    }
+    this.serverQueue.push(res)
     return this
   }
-  serverSend(): void {
+  broadcast(): void {
     this.serverQueue.forEach(res => this.server.send(res))
     this.serverQueue.length = 0
   }
 }
-
-export class ipcEvent extends Server {
+export class ipcRenderer extends IPC {
+  constructor() {
+    super()
+  }
+  send(channel: string, args?: any) {
+    // send message
+    const data = {
+      channel,
+      args
+    }
+    const res = JSON.stringify(data)
+    this.checkTarget()
+    this.server.send(res)
+    return this
+  }
+}
+export class ipcEvent extends IPC {
   constructor() {
     super()
   }

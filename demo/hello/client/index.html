@@ -25,6 +25,10 @@
       }).on('server broadcast',()=>{
         console.log('receive broadcast!');
       })
+
+      ipc.invoke('invoke','new invoke').then(res=>{
+        console.log('invoke msg:',res);
+      })
     }
     fn()
     /* once */

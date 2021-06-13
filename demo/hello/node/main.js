@@ -27,6 +27,9 @@ ipc.on('hello server', (e, arg) => {
 })
 ipc.once('once',(e)=>{
   e.reply('once')
+}).handle('invoke',(_,r)=>{
+  console.log('receive invoke:',r);
+  return 'handle'
 })
 
 server.listen(8080, () => {

@@ -1,15 +1,18 @@
-import { IPC } from "./common/ipc";
+import { ipcMain } from "./common/ipc";
 const WSocket = require('ws')
 
-export default function createIPC(server: any): IPC {
-  const wss = new WSocket.Server({ noServer: true });
-  const ipc = new IPC()
+export default function createIPC(server: any): ipcMain {
+  const wss = new WSocket.Server({ noServer: true })
+  const ipc = new ipcMain()
   wss.on('connection', async function connection(ws) {
     await ipc.connect(ws)
-    ipc.serverSend()
+    ipc.broadcast()
     ws.on('message', function incoming(msg) {
       const { channel, args } = JSON.parse(msg)
-      ipc.excute(channel, args)
+      if (channel.startsWith('$'))
+        ipc.excuteSync(channel.slice(1), args)
+      else
+        ipc.excute(channel, args)
     })
   })
   server.on('upgrade', function upgrade(request, socket, head) {

@@ -182,6 +182,7 @@ var Observer = /** @class */ (function () {
     function Observer() {
         this.queue = {};
         this.onceQueue = {};
+        this.handleQueue = {};
     }
     Observer.prototype.checkChannel = function (channel) {
         if (this.queue[channel] === void 0)
@@ -199,6 +200,14 @@ var Observer = /** @class */ (function () {
         var sym = JSON.stringify(listener);
         this.checkChannel(channel);
         this.onceQueue[channel].set(sym, listener);
+        return this;
+    };
+    Observer.prototype.handle = function (channel, listener) {
+        this.handleQueue[channel] = { type: 1, listener: listener };
+        return this;
+    };
+    Observer.prototype.handleOnce = function (channel, listener) {
+        this.handleQueue[channel] = { type: 0, listener: listener };
         return this;
     };
     Observer.prototype.listeners = function (channel) {
@@ -219,16 +228,19 @@ var Observer = /** @class */ (function () {
         this.onceQueue[channel].clear();
         return this;
     };
+    Observer.prototype.removeHandle = function (channel) {
+        delete this.handleQueue[channel];
+    };
     return Observer;
 }());
-var Server = /** @class */ (function (_super) {
-    __extends(Server, _super);
-    function Server() {
+var IPC = /** @class */ (function (_super) {
+    __extends(IPC, _super);
+    function IPC() {
         var _this = _super.call(this) || this;
         _this.hasTarget = false;
         return _this;
     }
-    Server.prototype.connect = function (server) {
+    IPC.prototype.connect = function (server) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
@@ -249,12 +261,12 @@ var Server = /** @class */ (function (_super) {
             });
         });
     };
-    Server.prototype.checkTarget = function () {
+    IPC.prototype.checkTarget = function () {
         if (!this.hasTarget) {
             throw new Error("please add a Server!");
         }
     };
-    Server.prototype.excute = function (channel, args) {
+    IPC.prototype.excute = function (channel, args) {
         var _this = this;
         if (this.queue[channel] === void 0)
             this.queue[channel] = new Map();
@@ -290,39 +302,102 @@ var Server = /** @class */ (function (_super) {
         }); });
         this.onceQueue[channel].clear();
     };
-    return Server;
+    IPC.prototype.excuteSync = function (channel, args) {
+        return __awaiter(this, void 0, void 0, function () {
+            var ev, _a, type, listener, result, data, res;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        ev = new ipcEvent();
+                        return [4 /*yield*/, ev.connect(this.server)];
+                    case 1:
+                        _b.sent();
+                        console.log(11111);
+                        _a = this.handleQueue[channel], type = _a.type, listener = _a.listener;
+                        if (type == 0)
+                            this.removeHandle(channel);
+                        return [4 /*yield*/, listener(ev, args)];
+                    case 2:
+                        result = _b.sent();
+                        data = {
+                            channel: "#" + channel,
+                            args: result
+                        };
+                        res = JSON.stringify(data);
+                        this.server.send(res);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    IPC.prototype.invoke = function (channel, args) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data, res;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.connect(this.server)];
+                    case 1:
+                        _a.sent();
+                        data = {
+                            channel: "$" + channel,
+                            args: args
+                        };
+                        res = JSON.stringify(data);
+                        this.server.send(res);
+                        return [2 /*return*/, new Promise(function (resolve) {
+                                _this.on("#" + channel, function (_, r) {
+                                    resolve(r);
+                                });
+                            })];
+                }
+            });
+        });
+    };
+    return IPC;
 }(Observer));
-var IPC = /** @class */ (function (_super) {
-    __extends(IPC, _super);
-    function IPC() {
+var ipcMain = /** @class */ (function (_super) {
+    __extends(ipcMain, _super);
+    function ipcMain() {
         var _this = _super.call(this) || this;
         _this.serverQueue = [];
-        _this.ipcType = typeof window == 'undefined' ? 'server' : 'web';
         return _this;
     }
-    IPC.prototype.send = function (channel, args) {
+    ipcMain.prototype.send = function (channel, args) {
         // send message
         var data = {
             channel: channel,
             args: args
         };
-        console.log(this.ipcType);
         var res = JSON.stringify(data);
-        if (this.ipcType === 'server')
-            this.serverQueue.push(res);
-        else {
-            this.checkTarget();
-            this.server.send(res);
-        }
+        this.serverQueue.push(res);
         return this;
     };
-    IPC.prototype.serverSend = function () {
+    ipcMain.prototype.broadcast = function () {
         var _this = this;
         this.serverQueue.forEach(function (res) { return _this.server.send(res); });
         this.serverQueue.length = 0;
     };
-    return IPC;
-}(Server));
+    return ipcMain;
+}(IPC));
+/** @class */ ((function (_super) {
+    __extends(ipcRenderer, _super);
+    function ipcRenderer() {
+        return _super.call(this) || this;
+    }
+    ipcRenderer.prototype.send = function (channel, args) {
+        // send message
+        var data = {
+            channel: channel,
+            args: args
+        };
+        var res = JSON.stringify(data);
+        this.checkTarget();
+        this.server.send(res);
+        return this;
+    };
+    return ipcRenderer;
+})(IPC));
 var ipcEvent = /** @class */ (function (_super) {
     __extends(ipcEvent, _super);
     function ipcEvent() {
@@ -344,12 +419,12 @@ var ipcEvent = /** @class */ (function (_super) {
         this.sender(channel, args);
     };
     return ipcEvent;
-}(Server));
+}(IPC));
 
 var WSocket = require('ws');
 function createIPC(server) {
     var wss = new WSocket.Server({ noServer: true });
-    var ipc = new IPC();
+    var ipc = new ipcMain();
     wss.on('connection', function connection(ws) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -357,10 +432,13 @@ function createIPC(server) {
                     case 0: return [4 /*yield*/, ipc.connect(ws)];
                     case 1:
                         _a.sent();
-                        ipc.serverSend();
+                        ipc.broadcast();
                         ws.on('message', function incoming(msg) {
                             var _a = JSON.parse(msg), channel = _a.channel, args = _a.args;
-                            ipc.excute(channel, args);
+                            if (channel.startsWith('$'))
+                                ipc.excuteSync(channel.slice(1), args);
+                            else
+                                ipc.excute(channel, args);
                         });
                         return [2 /*return*/];
                 }
