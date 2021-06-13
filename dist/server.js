@@ -201,6 +201,11 @@ var Observer = /** @class */ (function () {
         this.onceQueue[channel].set(sym, listener);
         return this;
     };
+    Observer.prototype.listeners = function (channel) {
+        var queue = Array.from(this.queue[channel].values());
+        var once = Array.from(this.onceQueue[channel].values());
+        return queue.concat(once);
+    };
     Observer.prototype.removerListener = function (channel, listener) {
         var sym = JSON.stringify(listener);
         this.checkChannel(channel);
@@ -253,18 +258,36 @@ var Server = /** @class */ (function (_super) {
         var _this = this;
         if (this.queue[channel] === void 0)
             this.queue[channel] = new Map();
-        this.queue[channel].forEach(function (func, sym) {
-            var ev = new ipcEvent();
-            ev.connect(_this.server);
-            func(ev, args);
-        });
+        this.queue[channel].forEach(function (func, sym) { return __awaiter(_this, void 0, void 0, function () {
+            var ev;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        ev = new ipcEvent();
+                        return [4 /*yield*/, ev.connect(this.server)];
+                    case 1:
+                        _a.sent();
+                        func(ev, args);
+                        return [2 /*return*/];
+                }
+            });
+        }); });
         if (this.onceQueue[channel] === void 0)
             this.onceQueue[channel] = new Map();
-        this.onceQueue[channel].forEach(function (func, sym) {
-            var ev = new ipcEvent();
-            ev.connect(_this.server);
-            func(ev, args);
-        });
+        this.onceQueue[channel].forEach(function (func, sym) { return __awaiter(_this, void 0, void 0, function () {
+            var ev;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        ev = new ipcEvent();
+                        return [4 /*yield*/, ev.connect(this.server)];
+                    case 1:
+                        _a.sent();
+                        func(ev, args);
+                        return [2 /*return*/];
+                }
+            });
+        }); });
         this.onceQueue[channel].clear();
     };
     return Server;

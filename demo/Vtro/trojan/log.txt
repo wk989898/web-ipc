@@ -1,0 +1,6 @@
+2021-05-00 12:29:55privoxy error!has you close privoxy?
+please check http://localhost:1081
+
+2021-05-00 12:29:59privoxy error!has you close privoxy?
+please check http://localhost:1081
+

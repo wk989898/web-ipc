@@ -23,6 +23,11 @@ class Observer {
     this.onceQueue[channel].set(sym, listener)
     return this
   }
+  listeners(channel: string): Array<handleFunc> {
+    const queue = Array.from(this.queue[channel].values())
+    const once = Array.from(this.onceQueue[channel].values())
+    return queue.concat(once)
+  }
   removerListener(channel: string, listener: handleFunc): Observer {
     const sym = JSON.stringify(listener)
     this.checkChannel(channel)
@@ -60,15 +65,15 @@ class Server extends Observer {
   }
   excute(channel: string, args?: any) {
     if (this.queue[channel] === void 0) this.queue[channel] = new Map()
-    this.queue[channel].forEach((func: handleFunc, sym: string) => {
+    this.queue[channel].forEach(async (func: handleFunc, sym: string) => {
       const ev = new ipcEvent()
-      ev.connect(this.server)
+      await ev.connect(this.server)
       func(ev, args)
     })
     if (this.onceQueue[channel] === void 0) this.onceQueue[channel] = new Map()
-    this.onceQueue[channel].forEach((func: handleFunc, sym: string) => {
+    this.onceQueue[channel].forEach(async (func: handleFunc, sym: string) => {
       const ev = new ipcEvent()
-      ev.connect(this.server)
+      await ev.connect(this.server)
       func(ev, args)
     })
     this.onceQueue[channel].clear()
@@ -88,7 +93,7 @@ export class IPC extends Server {
       channel,
       args
     }
-    console.log(this.ipcType )
+    console.log(this.ipcType)
     const res = JSON.stringify(data)
     if (this.ipcType === 'server')
       this.serverQueue.push(res)

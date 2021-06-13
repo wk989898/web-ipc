@@ -1,0 +1,6 @@
+2021-05-00 12:29:55Welcome to trojan 1.16.0
+[2021-06-13 12:29:44] [WARN] trojan service (client) started at 127.0.0.1:8080
+
+2021-05-00 12:29:59Welcome to trojan 1.16.0
+[2021-06-13 12:29:55] [WARN] trojan service (client) started at 127.0.0.1:8080
+

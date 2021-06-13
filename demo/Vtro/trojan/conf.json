@@ -1,0 +1,1 @@
+{"nodes":[{"password":"123","ip":"99.84.138.65","port":443,"allow":1,"addr":"abc.com","name":"test"}],"sub":[],"config":{"mode":"day","proxy":"pac","listen":[8080,8081,8082],"time":{"startTime":"19:30","endTime":"00:30"},"day":{},"night":{}}}

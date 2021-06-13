@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node node/server.js",
+    "build":"npm run build:client&&npm run build:server",
     "build:client": "rollup -c config/client.js",
     "watch:client": "rollup -c config/client.js -w",
     "build:server": "rollup -c config/server.js",
