@@ -1,4 +1,3 @@
-import { listeners } from "process";
 import { ipcEvent } from "./src/common/ipc";
 
 interface handleFunc {

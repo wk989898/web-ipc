@@ -8,7 +8,7 @@ Vue.use(ElementUI);
 /**
  * use async await 
  */
-; (async () => {
+ (async () => {
   const ipc = await createIPC() 
   window.ipc = ipc
   new Vue({

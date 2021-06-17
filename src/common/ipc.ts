@@ -58,7 +58,7 @@ class Observer {
 
 class IPC extends Observer {
   protected server: WebSocket
-  protected hasTarget: boolean = false
+  protected hasTarget = false
   constructor() {
     super()
   }
@@ -78,13 +78,13 @@ class IPC extends Observer {
   }
   excute(channel: string, args?: any) {
     if (this.queue[channel] === void 0) this.queue[channel] = new Map()
-    this.queue[channel].forEach(async (func: handleFunc, sym: string) => {
+    this.queue[channel].forEach(async (func: handleFunc) => {
       const ev = new ipcEvent()
       await ev.connect(this.server)
       func(ev, args)
     })
     if (this.onceQueue[channel] === void 0) this.onceQueue[channel] = new Map()
-    this.onceQueue[channel].forEach(async (func: handleFunc, sym: string) => {
+    this.onceQueue[channel].forEach(async (func: handleFunc) => {
       const ev = new ipcEvent()
       await ev.connect(this.server)
       func(ev, args)
@@ -96,7 +96,7 @@ class IPC extends Observer {
     await ev.connect(this.server)
     const { type, listener } = this.handleQueue[channel]
     if (type == 0) this.removeHandle(channel)
-    var result = await listener(ev, args)
+    const result = await listener(ev, args)
     const data = {
       channel: `#${channel}`,
       args: result
@@ -143,15 +143,15 @@ export class ipcRenderer extends IPC {
   constructor() {
     super()
   }
-  async sendSync(channel: string, args?: any){
+  async sendSync(channel: string, args?: any) {
     const data = {
-      channel:`$${channel}`,
+      channel: `$${channel}`,
       args
     }
     const res = JSON.stringify(data)
     this.checkTarget()
     this.server.send(res)
-    var result=await new Promise(resolve => {
+    const result = await new Promise(resolve => {
       this.on(`#${channel}`, (_, r) => {
         resolve(r)
       })

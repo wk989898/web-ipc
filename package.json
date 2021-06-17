@@ -2,19 +2,20 @@
   "name": "web-ipc",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
+  "type": "commonjs",
   "scripts": {
     "start": "node node/server.js",
-    "precommit":"npm run build",
     "build": "npm run build:client&&npm run build:server",
     "build:client": "rollup -c config/client.js",
     "watch:client": "rollup -c config/client.js -w",
     "build:server": "rollup -c config/server.js",
-    "watch:server": "rollup -c config/server.js -w"
+    "watch:server": "rollup -c config/server.js -w",
+    "lint": "eslint --fix"
   },
+  "pre-commit": [
+    "build",
+    "lint"
+  ],
   "keywords": [
     "web-ipc",
     "ipc",
@@ -25,11 +26,15 @@
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.2.1",
     "@types/node": "^15.12.1",
-    "husky": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.27.0",
+    "@typescript-eslint/parser": "^4.27.0",
+    "eslint": "^7.28.0",
+    "pre-commit": "^1.2.2",
     "rollup": "^2.51.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0"
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "typescript": "^4.3.3"
   },
   "dependencies": {
     "ws": "^7.4.6"

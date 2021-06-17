@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * @fileoverview
  * - Using the 'QRCode for Javascript library'
@@ -427,7 +426,7 @@ var QRCode;
 			} else if (self._bSupportDataURI === false && self._fFail) {
 				self._fFail.call(self);
 			}
-		};
+		}
 
 		/**
 		 * Drawing QRCode by using canvas
