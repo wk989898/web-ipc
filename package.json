@@ -8,18 +8,24 @@
   },
   "scripts": {
     "start": "node node/server.js",
-    "build":"npm run build:client&&npm run build:server",
+    "precommit":"npm run build",
+    "build": "npm run build:client&&npm run build:server",
     "build:client": "rollup -c config/client.js",
     "watch:client": "rollup -c config/client.js -w",
     "build:server": "rollup -c config/server.js",
     "watch:server": "rollup -c config/server.js -w"
   },
-  "keywords": ["web-ipc","ipc","websocket"],
+  "keywords": [
+    "web-ipc",
+    "ipc",
+    "websocket"
+  ],
   "author": "wk989898",
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.2.1",
     "@types/node": "^15.12.1",
+    "husky": "^6.0.0",
     "rollup": "^2.51.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",

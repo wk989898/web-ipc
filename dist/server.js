@@ -312,7 +312,6 @@ var IPC = /** @class */ (function (_super) {
                         return [4 /*yield*/, ev.connect(this.server)];
                     case 1:
                         _b.sent();
-                        console.log(11111);
                         _a = this.handleQueue[channel], type = _a.type, listener = _a.listener;
                         if (type == 0)
                             this.removeHandle(channel);
@@ -364,7 +363,6 @@ var ipcMain = /** @class */ (function (_super) {
         return _this;
     }
     ipcMain.prototype.send = function (channel, args) {
-        // send message
         var data = {
             channel: channel,
             args: args
@@ -385,8 +383,33 @@ var ipcMain = /** @class */ (function (_super) {
     function ipcRenderer() {
         return _super.call(this) || this;
     }
+    ipcRenderer.prototype.sendSync = function (channel, args) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data, res, result;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        data = {
+                            channel: "$" + channel,
+                            args: args
+                        };
+                        res = JSON.stringify(data);
+                        this.checkTarget();
+                        this.server.send(res);
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                _this.on("#" + channel, function (_, r) {
+                                    resolve(r);
+                                });
+                            })];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
     ipcRenderer.prototype.send = function (channel, args) {
-        // send message
         var data = {
             channel: channel,
             args: args
