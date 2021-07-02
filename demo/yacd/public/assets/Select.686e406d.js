@@ -1,0 +1,1 @@
+import{F as e}from"./vendor.170fbb21.js";var t="_select_1mr76_1";function o({options:o,selected:a,onChange:n}){return e.exports.createElement("select",{className:t,value:a,onChange:n},o.map((([t,o])=>e.exports.createElement("option",{key:t,value:t},o))))}export{o as S};
